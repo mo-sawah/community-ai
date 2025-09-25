@@ -1,0 +1,50 @@
+/* Community AI Frontend Styles */
+:root {
+  --cai-primary-color: #3b82f6;
+  --cai-text-dark: #1f2937;
+  --cai-text-light: #6b7280;
+  --cai-bg-light: #f9fafb;
+  --cai-border-color: #e5e7eb;
+}
+.community-ai-container {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  background-color: var(--cai-bg-light);
+  padding: 2rem 1rem;
+}
+.cai-loading-spinner {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 2rem auto;
+}
+.cai-loading-spinner div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  border: 8px solid var(--cai-primary-color);
+  border-radius: 50%;
+  animation: cai-loading-spinner 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: var(--cai-primary-color) transparent transparent transparent;
+}
+.cai-loading-spinner div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+.cai-loading-spinner div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.cai-loading-spinner div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes cai-loading-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

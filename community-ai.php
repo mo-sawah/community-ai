@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Community AI
  * Description:       An advanced AI-powered community platform with intelligent content generation, moderation, and engagement features.
- * Version:           1.0.1
+ * Version:           1.0.3
  * Author:            Mohamed Sawah
  * Author URI:        https://sawahsolutions.com
  * License:           GPL v2 or later
@@ -16,29 +16,18 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
-// Define constants
-define('COMMUNITY_AI_VERSION', '1.0.1');
+// Define Constants
+define('COMMUNITY_AI_VERSION', '1.0.3');
 define('COMMUNITY_AI_PLUGIN_FILE', __FILE__);
 define('COMMUNITY_AI_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('COMMUNITY_AI_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('COMMUNITY_AI_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 final class Community_AI_Plugin {
+    use AI_Community_Singleton;
 
-    private static ?Community_AI_Plugin $instance = null;
     public ?AI_Community_Container $container = null;
 
-    public static function get_instance(): self {
-        if (null === self::$instance) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
-
-    private function __construct() {
-        if (!function_exists('add_action')) {
-            return;
-        }
+    protected function __construct() {
         $this->load_dependencies();
         $this->init_container();
         $this->init_hooks();
@@ -59,7 +48,7 @@ final class Community_AI_Plugin {
     }
 
     private function init_container(): void {
-        $this->container = new AI_Community_Container();
+        $this->container = AI_Community_Container::get_instance();
         
         $this->container->register('database', AI_Community_Database::class);
         $this->container->register('settings', AI_Community_Settings::class);
@@ -67,21 +56,18 @@ final class Community_AI_Plugin {
         $this->container->register('ai_generator', AI_Community_AI_Generator::class, ['settings', 'database', 'openrouter']);
         $this->container->register('rest_api', AI_Community_REST_API::class, ['database', 'settings']);
         $this->container->register('assets', AI_Community_Assets::class);
-        $this->container->register('frontend', AI_Community_Frontend::class);
+        $this->container->register('frontend', AI_Community_Frontend::class, ['settings']);
         $this->container->register('admin', AI_Community_Admin::class, ['settings', 'database', 'ai_generator']);
         $this->container->register('installer', AI_Community_Installer::class, ['database']);
     }
 
     private function init_hooks(): void {
-        // Activation & Deactivation
         $installer = $this->container->get('installer');
         register_activation_hook(COMMUNITY_AI_PLUGIN_FILE, [$installer, 'activate']);
         register_deactivation_hook(COMMUNITY_AI_PLUGIN_FILE, [$installer, 'deactivate']);
 
-        // Load text domain for translations
         add_action('plugins_loaded', [$this, 'load_textdomain']);
 
-        // Initialize components
         $this->container->get('settings')->init();
         $this->container->get('rest_api')->init();
         $this->container->get('assets')->init();
@@ -104,9 +90,6 @@ final class Community_AI_Plugin {
     public function get_component(string $name) {
         return $this->container->get($name);
     }
-    
-    private function __clone() {}
-    public function __wakeup() {}
 }
 
 function Community_AI(): Community_AI_Plugin {

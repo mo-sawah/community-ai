@@ -1,74 +1,81 @@
 jQuery(document).ready(function ($) {
-  // Initialize Tabs for settings page
-  if ($("#tabs").length) {
-    $("#tabs").tabs();
+  if ($("#cai-tabs").length) {
+    $("#cai-tabs").tabs();
   }
-
-  // Initialize Color Picker
   if ($(".color-picker").length) {
     $(".color-picker").wpColorPicker();
   }
 
-  // Handle Settings Form Submission
-  $("#community-ai-settings-form").on("submit", function (e) {
+  $("#cai-settings-form").on("submit", function (e) {
     e.preventDefault();
     const form = $(this);
-    const feedbackDiv = $("#settings-save-feedback");
-    const submitButton = form.find(".button-primary");
-    const originalButtonText = submitButton.val();
+    const feedback = $("#cai-settings-feedback");
+    const button = form.find(".button-primary");
+    const originalText = button.val();
 
-    submitButton.val("Saving...").prop("disabled", true);
-    feedbackDiv.empty().removeClass("notice-success notice-error");
+    button.val("Saving...").prop("disabled", true);
+    feedback.empty().removeClass("notice-success notice-error");
 
-    const formData = form.serializeArray();
     const settingsData = {};
-
-    $.each(formData, function (i, field) {
-      // Handle checkboxes that are not checked
-      if (form.find(`input[type="checkbox"][name="${field.name}"]`).length) {
-        // This logic needs to be more robust, for now we will assume it is sent
-      }
-      settingsData[field.name] = field.value;
+    form.serializeArray().forEach((item) => {
+      settingsData[item.name] = item.value;
     });
-
-    // Handle unchecked checkboxes
     form.find('input[type="checkbox"]').each(function () {
-      if (!this.checked) {
-        settingsData[this.name] = "0";
-      }
+      settingsData[this.name] = this.checked ? "1" : "0";
     });
 
     $.ajax({
-      url: ajaxurl,
+      url: communityAiAdmin.ajax_url,
       type: "POST",
       data: {
         action: "community_ai_save_settings",
-        nonce: settingsData.nonce,
+        nonce: communityAiAdmin.nonce,
         settings: settingsData,
       },
-      success: function (response) {
-        if (response.success) {
-          feedbackDiv
-            .addClass("notice notice-success is-dismissible")
-            .html("<p>" + response.data.message + "</p>");
-        } else {
-          feedbackDiv
-            .addClass("notice notice-error is-dismissible")
-            .html(
-              "<p>" + (response.data.message || "An error occurred.") + "</p>"
-            );
-        }
+      success: function (res) {
+        const noticeClass = res.success ? "notice-success" : "notice-error";
+        feedback
+          .addClass(`notice ${noticeClass} is-dismissible`)
+          .html(`<p>${res.data.message}</p>`);
       },
       error: function () {
-        feedbackDiv
+        feedback
           .addClass("notice notice-error is-dismissible")
           .html("<p>An unexpected error occurred.</p>");
       },
       complete: function () {
-        submitButton.val(originalButtonText).prop("disabled", false);
-        setTimeout(() => {
-          feedbackDiv.fadeOut().empty();
-        }, 4000);
+        button.val(originalText).prop("disabled", false);
+        setTimeout(() => feedback.fadeOut().empty(), 4000);
+      },
+    });
+  });
+
+  $("#cai-generate-now").on("click", function (e) {
+    e.preventDefault();
+    const button = $(this);
+    const feedback = $("#cai-generate-feedback");
+    const originalText = button.text();
+
+    button.text("Generating...").prop("disabled", true);
+    feedback.text("").removeClass("success error");
+
+    $.ajax({
+      url: communityAiAdmin.ajax_url,
+      type: "POST",
+      data: {
+        action: "community_ai_generate_now",
+        nonce: communityAiAdmin.nonce,
+      },
+      success: function (res) {
+        feedback
+          .text(res.data.message)
+          .addClass(res.success ? "success" : "error");
+      },
+      error: function () {
+        feedback.text("Request failed.").addClass("error");
+      },
+      complete: function () {
+        button.text(originalText).prop("disabled", false);
       },
     });
   });
