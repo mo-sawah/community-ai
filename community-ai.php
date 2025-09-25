@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Community AI
  * Description:       An advanced AI-powered community platform with intelligent content generation, moderation, and engagement features.
- * Version:           1.0.0
+ * Version:           1.0.1
  * Author:            Mohamed Sawah
  * Author URI:        https://sawahsolutions.com
  * License:           GPL v2 or later
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define constants
-define('COMMUNITY_AI_VERSION', '1.0.0');
+define('COMMUNITY_AI_VERSION', '1.0.1');
 define('COMMUNITY_AI_PLUGIN_FILE', __FILE__);
 define('COMMUNITY_AI_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('COMMUNITY_AI_PLUGIN_URL', plugin_dir_url(__FILE__));
